@@ -57,9 +57,10 @@ export default function AnalyticsPage() {
       setAdminUser(userData);
 
       const { data, error } = await supabase
-        .from("admin_users")
+        .from("users")
         .select("*")
         .eq("username", userData.username)
+        .eq("is_admin", true)
         .single();
 
       if (error || !data) {

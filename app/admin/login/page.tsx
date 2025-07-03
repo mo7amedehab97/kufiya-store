@@ -1,87 +1,93 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowLeft, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { supabase } from "@/lib/supabase"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const router = useRouter()
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      console.log("Attempting login for username:", username)
+      console.log("Attempting login for username:", username);
 
       // Check if user exists in database with matching username and password
       const { data, error } = await supabase
-        .from("admin_users")
+        .from("users")
         .select("*")
         .eq("username", username)
         .eq("password_hash", password) // Direct password comparison for now
-        .single()
+        .eq("is_admin", true)
+        .single();
 
-      console.log("Database response:", { data, error })
+      console.log("Database response:", { data, error });
 
       if (error || !data) {
-        console.log("Login failed:", error?.message)
-        setError("Invalid username or password. Please check your credentials.")
-        setIsLoading(false)
-        return
+        console.log("Login failed:", error?.message);
+        setError(
+          "Invalid username or password. Please check your credentials."
+        );
+        setIsLoading(false);
+        return;
       }
 
-      console.log("Login successful for user:", data.username)
+      console.log("Login successful for user:", data.username);
 
       // Store admin session
-      localStorage.setItem("admin-authenticated", "true")
-      localStorage.setItem("admin-user", JSON.stringify(data))
+      localStorage.setItem("admin-authenticated", "true");
+      localStorage.setItem("admin-user", JSON.stringify(data));
 
       // Redirect to dashboard
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (err: any) {
-      console.error("Login error:", err)
-      setError("Login failed. Please try again.")
+      console.error("Login error:", err);
+      setError("Login failed. Please try again.");
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const fillTestCredentials = (user: "admin" | "mohamed" | "test") => {
     if (user === "admin") {
-      setUsername("admin")
-      setPassword("admin123")
+      setUsername("admin");
+      setPassword("admin123");
     } else if (user === "mohamed") {
-      setUsername("mohamed.helles97")
-      setPassword("Lplp12345$$")
+      setUsername("mohamed.helles97");
+      setPassword("Lplp12345$$");
     } else if (user === "test") {
-      setUsername("test")
-      setPassword("test123")
+      setUsername("test");
+      setPassword("test123");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
       <div className="w-full max-w-md px-4">
         {/* Header */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          >
             <ArrowLeft className="w-5 h-5" />
             Back to Store
           </Link>
@@ -155,7 +161,11 @@ export default function AdminLogin() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={isLoading}
+              >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
@@ -163,5 +173,5 @@ export default function AdminLogin() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
